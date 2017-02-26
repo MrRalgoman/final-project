@@ -1,27 +1,50 @@
-# /home/lucas/python/final_project
-
-import pygame, time, random
+import pygame
 
 pygame.init()
 
-window_size = window_width, window_height = 1200, 800
-window = pygame.display.set_mode(window_size)
+# Colors
+white = (255,255,255)
+black = (0,0,0)
 
-pygame.display.set_caption("Hey")
-window.fill((255,255,255))
+# Set the display width / height
+DISP_W = 600
+DISP_H = 700
 
-clock = pygame.time.Clock()
-FPS = 60
+# Initiate window
+GAME_DISP = pygame.display.set_mode((DISP_W, DISP_H))
+pygame.display.set_caption("Amazing Brick")
 
-running = True
+# Window background color
+GAME_DISP.fill((255,255,255))
+pygame.display.update()
 
-while(running): 
-    for event in pygame.event.get():
-        if (event.type == pygame.QUIT):
-            running = False
+X = DISP_W/2
+Y = DISP_H/2
 
+# Brick size
+SIZE = 12
 
-    clock.tick(FPS)
+def amazing_brick():
+    
+    # Initiates game loop
+    game_exit = True
 
-pygame.quit()
-quit()
+    # Game loop
+    while game_exit:
+        # Gets all events
+        for event in pygame.event.get():
+            # Close event
+            if event.type == pygame.QUIT:
+                # Closes game loop
+                game_exit = False
+
+        # Draw diamond
+        pygame.draw.polygon(GAME_DISP, black, [(X-SIZE, Y), (X, Y-SIZE), (X+SIZE, Y), (X, Y+SIZE)])
+
+        pygame.display.update()
+
+    # When game loop exits window closes
+    pygame.quit()
+    quit()
+
+amazing_brick()
