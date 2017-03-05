@@ -30,25 +30,78 @@ paddle1 = User_paddle()
 ball_group.add(ball)
 collision_group.add(paddle1)
 
+# ----- Functions ----- #
 def text(text, size, color, x, y):
     myFont = pygame.font.SysFont("monospace", size)
     button = myFont.render(text, True, color)
     text_rect = button.get_rect(center=(x, y))
     GAME_DISP.blit(button, text_rect)
 
-def outlinedRect(color, x, y, width, height):
-    pygame.draw.rect(GAME_DISP, color, [x, y, width, height])
-    pygame.draw.rect(GAME_DISP, black, [x+1, y+1, width-2, height-2])
+def outlinedRect(color, x, y, w, h):
+    pygame.draw.rect(GAME_DISP, color, [x, y, w, h])
+    pygame.draw.rect(GAME_DISP, black, [x+1, y+1, w-2, h-2])
 
+def button(text, size, color, x, y, w, h, action=None):
+    # sets list of the width and height of the button
+    button_width = range(int(x), int(x)+int(w))
+    button_height = range(int(y), int(y)+int(h))
+    text_color = white
+    # Get's mouse x and y
+    mX, mY = pygame.mouse.get_pos()
+    b1, b2, b3 = pygame.mouse.get_pressed()
 
-# ----- Game Func ----- #
-def pong():
+    # Checks if the mouse is in the button width/height
+    if mX in button_width and mY in button_height:
+        # If left mouse button pressed
+        if b1 and action != None:
+            if action == "quit":
+                pygame.quit()
+                quit()
+            if action == "play":
+                main()
+        color = grey
+        
+
+    # Draw buttons and text
+    pygame.draw.rect(GAME_DISP, white, [x, y, w, h])
+    pygame.draw.rect(GAME_DISP, color, [x+1, y+1, w-2, h-2])
+    myFont = pygame.font.SysFont("monospace", size)
+    button = myFont.render(text, True, text_color)
+    text_rect = button.get_rect(center=(x+w/2, y+h/2))
+    GAME_DISP.blit(button, text_rect)
+
+# ----- Game Start ----- #
+def gameStart():
+
+    game_exit = False
+
+    while not game_exit:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_exit = True
+                
+        # Play button
+        GAME_DISP.fill(black)
+        text("Pong", 100, white, DISP_W/2, 100)
+        text("By Lucas and Shawn", 25, white, DISP_W/2, 175)
+        button("Play", 40, black, (DISP_W/2)-300, (DISP_H/2)-25, 200, 50, "play")
+        button("Quit", 40, black, (DISP_W/2)+100, (DISP_H/2)-25, 200, 50, "quit")
+        button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+100, 300, 50)
+        pygame.display.update()
+
+        clock.tick(FPS)
+
+    pygame.quit()
+    quit()
+
+# ----- Main Func ----- #
+def main():
 
     # Setting the loop breakers
     game_exit = False
     game_pause = False
     game_over = False
-    game_start = True
 
     # ball positon/velocity
     ball_x = DISP_W/2
@@ -63,15 +116,6 @@ def pong():
         
         # Gets the mouseX and mouseY every frame
         mX, mY = pygame.mouse.get_pos()
-
-        # ----- Game Start ----- #
-        while game_start:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    game_start = False
-                    game_exit = True
-
-            game_start = False
 
         # ----- Game Pause ----- #
         while game_pause:
@@ -90,9 +134,10 @@ def pong():
                             text("Game Resuming in " + str(i)  + "...", 50, white, DISP_W/2, DISP_H/2)
                             pygame.display.update()
                             time.sleep(1)
-
+            
+            GAME_DISP.fill(black)
             # Pause menu text
-            text("Game Paused", 75, white, DISP_W/2, (DISP_H/2) - 100)
+            text("Game Paused", 75, white, DISP_W/2, 150)
             outlinedRect(white, DISP_W/2 - 150, DISP_H/2 - 20, 300, 40)
             text("<SPACE> to resume", 25, white, DISP_W/2, DISP_H/2)
             
@@ -110,7 +155,7 @@ def pong():
             pygame.display.update()
             time.sleep(1)
             game_over = False
-            game_start = True
+            main()
 
         # ----- Game Events ----- #
         for event in pygame.event.get():
@@ -135,7 +180,7 @@ def pong():
 
         # GAME OVER
         if ball_x <= -25:
-            game_over = True
+            gameStart()
 
         # Drawing sprites
         ball_group.draw(GAME_DISP)
@@ -151,4 +196,4 @@ def pong():
     pygame.quit()
     quit()
 
-pong()
+gameStart()
