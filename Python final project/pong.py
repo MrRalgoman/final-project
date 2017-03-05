@@ -1,4 +1,4 @@
-import pygame, sys, time
+import pygame, sys, time, math
 from classes import *
 from colors import *
 
@@ -17,6 +17,7 @@ pygame.display.set_caption("Pong")
 
 # Allows us to limit the tick rate
 clock = pygame.time.Clock()
+timer = pygame.time.Clock()
 
 # Sprite groups
 ball_group = pygame.sprite.Group()
@@ -59,6 +60,8 @@ def button(text, size, color, x, y, w, h, action=None):
                 quit()
             if action == "play":
                 main()
+            if action =="high scores":
+                highScores(text, size, color, x, y)
         color = grey
         
 
@@ -98,6 +101,16 @@ def gameStart():
 # ----- Main Func ----- #
 def main():
 
+    # Accepted username keys
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    charList = []
+    for char in chars:
+        charList.append(char)
+
+    # Initiate the username for the game over loop
+    username = ''
+    saved_username = ''
+
     # Setting the loop breakers
     game_exit = False
     game_pause = False
@@ -111,8 +124,15 @@ def main():
     if ball_y >= DISP_H:
         velocity = -velocity
 
+    count = 0
+
     # ----- Game Loop ----- #
     while not game_exit:
+        
+        # Score is the number of seconds a player lasts
+        count = count + 1
+
+        score = str(int(count/FPS))
         
         # Gets the mouseX and mouseY every frame
         mX, mY = pygame.mouse.get_pos()
@@ -133,29 +153,47 @@ def main():
                             GAME_DISP.fill(black)
                             text("Game Resuming in " + str(i)  + "...", 50, white, DISP_W/2, DISP_H/2)
                             pygame.display.update()
-                            time.sleep(1)
+                            # Takes miliseconds
+                            pygame.time.wait(1000)
             
             GAME_DISP.fill(black)
             # Pause menu text
             text("Game Paused", 75, white, DISP_W/2, 150)
             outlinedRect(white, DISP_W/2 - 150, DISP_H/2 - 20, 300, 40)
+            button("<SPACE> to resume", 25, black, (DISP_W/2)-150, (DISP_H/2)-20, 300, 40)
             text("<SPACE> to resume", 25, white, DISP_W/2, DISP_H/2)
             
             pygame.display.update()
 
         # ----- Game Over ----- #
         while game_over:
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     game_over = False
                     game_exit = True
+                # Basic text input
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        key = ' '
+                        username = username + key
+                    elif event.key == pygame.K_BACKSPACE:
+                        username = username[0:-1]
+                    elif event.key == pygame.K_RETURN:
+                        game_over = False
+                        # High scores file
+                        scores = open("high_scores.txt", "a")
+                        scores.write(username + ": " + score + "\n")
+                        scores.close()
+                        gameStart()
+                    elif pygame.key.name(event.key) in charList:
+                        key = pygame.key.name(event.key)
+                        username = username + key
 
-            GAME_DISP.fill(black)
-            text("You've Failed!", 100, white, DISP_W/2, DISP_H/2)
-            pygame.display.update()
-            time.sleep(1)
-            game_over = False
-            main()
+                    GAME_DISP.fill(black)
+                    text("Game Over!", 75, white, DISP_W/2, 100)
+                    text("Enter a username:" + username, 30, white, DISP_W/2, DISP_H/2)
+                    pygame.display.update()
 
         # ----- Game Events ----- #
         for event in pygame.event.get():
@@ -171,6 +209,9 @@ def main():
 
         # Background fill
         GAME_DISP.fill(black)
+        
+        # timer display
+        text("Seconds: " + score, 35, white, DISP_W/2, 25)
 
         # Setting positions
         ball.set_pos(ball_x, ball_y)
@@ -180,7 +221,7 @@ def main():
 
         # GAME OVER
         if ball_x <= -25:
-            gameStart()
+            game_over = True
 
         # Drawing sprites
         ball_group.draw(GAME_DISP)
