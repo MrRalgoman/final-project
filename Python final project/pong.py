@@ -23,14 +23,14 @@ ball_group = pygame.sprite.Group()
 collision_group = pygame.sprite.Group()
 
 # Initiating sprites
-ball = Ball(white, 20, 20)
-paddle1 = User_paddle()
-paddle2 = User_paddle()
+ball = Ball()
+user_paddle = paddle("user_paddle.png")
+AI_paddle = paddle("AI_paddle.png")
 
 # Adding to groups
 ball_group.add(ball)
-collision_group.add(paddle1)
-collision_group.add(paddle2)
+collision_group.add(user_paddle)
+collision_group.add(AI_paddle)
 
 # ----- Functions ----- #
 def text(text, size, color, x, y):
@@ -269,8 +269,8 @@ def main():
 
         # Setting positions
         ball.set_pos(ball_x, ball_y)
-        paddle1.set_pos(paddle_offset, mY-30)
-        paddle2.set_pos((DISP_W - paddle_offset * 2), ball_y-5)
+        user_paddle.set_pos(paddle_offset, mY-30)
+        AI_paddle.set_pos((DISP_W - paddle_offset * 4), ball_y-5)
 
         # Collision detections
         if ball_y + 20 >= DISP_H or ball_y <= 0:
