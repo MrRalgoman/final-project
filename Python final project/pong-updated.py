@@ -92,6 +92,7 @@ def gameStart():
         button("Play", 40, black, (DISP_W/2)-100, (DISP_H/2)-40, 200, 50, "play")
         button("Quit", 40, black, (DISP_W/2)-100, (DISP_H/2)+60, 200, 50, "quit")
         button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+160, 300, 50, "high scores")
+        text("(press and hold)", 20, white, 500, 525)
         pygame.display.update()
 
         clock.tick(FPS)
