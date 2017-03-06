@@ -1,4 +1,4 @@
-import pygame, sys, time, math
+import pygame, sys, time, random
 from classes import *
 from colors import *
 
@@ -23,7 +23,7 @@ ball_group = pygame.sprite.Group()
 collision_group = pygame.sprite.Group()
 
 # Initiating sprites
-ball = Ball()
+ball = Ball(white, 20, 20)
 paddle1 = User_paddle()
 paddle2 = User_paddle()
 
@@ -99,6 +99,14 @@ def gameStart():
     pygame.quit()
     quit()
 
+#----- High Scores -----#
+def highScores(color, x, y, w, h):
+    scores = open("high_scores.txt","r")
+    contents = scores.read().split("\n")
+    pygame.draw.rect(GAME_DISP, black , [0, 0, DISP_W, DISP_H])
+    text(str(contents), 20, white, 500, 200)
+    pygame.display.update()
+
 # ----- Main Func ----- #
 def main():
 
@@ -120,8 +128,8 @@ def main():
     # ball positon/velocity
     ball_x = DISP_W/2
     ball_y = DISP_H/2
-    vel_x = 3
-    vel_y = 3   
+    vel_x = 4
+    vel_y = 5
     speed = 1
 
     # Change speed after how many seconds and by how much
@@ -134,6 +142,9 @@ def main():
     # ----- Game Loop ----- #
     while not game_exit:
 
+        # Setting mouse to invisible while playing
+        pygame.mouse.set_visible(False)
+
         # Score is the number of seconds a player lasts
         count = count + 1
 
@@ -144,6 +155,9 @@ def main():
 
         # ----- Game Pause ----- #
         while game_pause:
+
+            pygame.mouse.set_visible(True)
+
             for event in pygame.event.get():
                 # exits the pause and exits the game
                 if event.type == pygame.QUIT:
@@ -156,22 +170,29 @@ def main():
                         # Resume countdown
                         for i in range(3, 0, -1):
                             GAME_DISP.fill(black)
+                            ball_group.draw(GAME_DISP)
+                            collision_group.draw(GAME_DISP)
+                            text("x" + str(round(speed, 1)) + " Speed", 25, white, (DISP_W/2)-90, 25)
+                            text("Score: " + str(score), 25, white, (DISP_W/2)+90, 25)
                             text("Game Resuming in " + str(i)  + "...", 50, white, DISP_W/2, DISP_H/2)
                             pygame.display.update()
                             # Takes miliseconds
                             pygame.time.wait(1000)
             
             GAME_DISP.fill(black)
+            ball_group.draw(GAME_DISP)
+            collision_group.draw(GAME_DISP)
+            text("x" + str(round(speed, 1)) + " Speed", 25, white, (DISP_W/2)-90, 25)
+            text("Score: " + str(score), 25, white, (DISP_W/2)+90, 25)
             # Pause menu text
             text("Game Paused", 75, white, DISP_W/2, 150)
-            outlinedRect(white, DISP_W/2 - 150, DISP_H/2 - 20, 300, 40)
             button("<SPACE> to resume", 25, black, (DISP_W/2)-150, (DISP_H/2)-20, 300, 40)
-            text("<SPACE> to resume", 25, white, DISP_W/2, DISP_H/2)
-            
             pygame.display.update()
 
         # ----- Game Over ----- #
         while game_over:
+
+            pygame.mouse.set_visible(True)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -180,11 +201,22 @@ def main():
                     
                 # Basic text input
                 if event.type == pygame.KEYDOWN:
+                    # space
                     if event.key == pygame.K_SPACE:
                         key = ' '
                         username = username + key
+                    # backspace
                     elif event.key == pygame.K_BACKSPACE:
                         username = username[0:-1]
+                    # any key in the allowed character list
+                    elif pygame.key.name(event.key) in charList:
+                        key = pygame.key.name(event.key)
+                        username = username + key
+                    # quit
+                    elif event.key == pygame.K_ESCAPE:
+                        game_over = False
+                        game_exit = True
+                    # continue
                     elif event.key == pygame.K_RETURN:
                         game_over = False
                         # High scores file
@@ -193,14 +225,13 @@ def main():
                             scores.write(username + ": " + str(score) + "\n")
                             scores.close()
                         gameStart()
-                    elif pygame.key.name(event.key) in charList:
-                        key = pygame.key.name(event.key)
-                        username = username + key
 
             GAME_DISP.fill(black)
+            # Game over text
             text("Game Over", 75, white, DISP_W/2, 100)
             text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
-            text("Press <ENTER> to continue...", 20, white, DISP_W/2, (DISP_H/2)+50)
+            button("Press <ENTER> to continue", 20, black, (DISP_W/2)-175, (DISP_H/2)+165, 350, 30)
+            button("Or <ESC> to quit", 20, black, (DISP_W/2)-175, (DISP_H/2)+200, 350, 30)
             pygame.display.update()
 
         # ----- Game Events ----- #
@@ -215,7 +246,7 @@ def main():
                 if event.key == pygame.K_SPACE:
                     game_pause = True
  
-        # Getting time elapsed in the loop
+        # Changes the speed based on the rate in seconds
         for i in range(0, count+1, rate):
             if count == 60 * i:
                 speed = speed + .2
