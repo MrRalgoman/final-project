@@ -17,7 +17,6 @@ pygame.display.set_caption("Pong")
 
 # Allows us to limit the tick rate
 clock = pygame.time.Clock()
-timer = pygame.time.Clock()
 
 # Sprite groups
 ball_group = pygame.sprite.Group()
@@ -26,10 +25,12 @@ collision_group = pygame.sprite.Group()
 # Initiating sprites
 ball = Ball()
 paddle1 = User_paddle()
+paddle2 = User_paddle()
 
 # Adding to groups
 ball_group.add(ball)
 collision_group.add(paddle1)
+collision_group.add(paddle2)
 
 # ----- Functions ----- #
 def text(text, size, color, x, y):
@@ -88,9 +89,9 @@ def gameStart():
         GAME_DISP.fill(black)
         text("Pong", 100, white, DISP_W/2, 100)
         text("By Lucas and Shawn", 25, white, DISP_W/2, 175)
-        button("Play", 40, black, (DISP_W/2)-300, (DISP_H/2)-25, 200, 50, "play")
-        button("Quit", 40, black, (DISP_W/2)+100, (DISP_H/2)-25, 200, 50, "quit")
-        button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+100, 300, 50)
+        button("Play", 40, black, (DISP_W/2)-100, (DISP_H/2)-40, 200, 50, "play")
+        button("Quit", 40, black, (DISP_W/2)-100, (DISP_H/2)+60, 200, 50, "quit")
+        button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+160, 300, 50, "high scores")
         pygame.display.update()
 
         clock.tick(FPS)
@@ -119,20 +120,24 @@ def main():
     # ball positon/velocity
     ball_x = DISP_W/2
     ball_y = DISP_H/2
-    velocity = 3
-        
-    if ball_y >= DISP_H:
-        velocity = -velocity
+    vel_x = 3
+    vel_y = 3   
+    speed = 1
 
+    # Change speed after how many seconds and by how much
+    rate = 5
+    change = 0.5
+
+    # Counter to determine the score inside the while loop
     count = 0
 
     # ----- Game Loop ----- #
     while not game_exit:
-        
+
         # Score is the number of seconds a player lasts
         count = count + 1
 
-        score = str(int(count/FPS))
+        score = int(count/FPS)
         
         # Gets the mouseX and mouseY every frame
         mX, mY = pygame.mouse.get_pos()
@@ -172,6 +177,7 @@ def main():
                 if event.type == pygame.QUIT:
                     game_over = False
                     game_exit = True
+                    
                 # Basic text input
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
@@ -182,18 +188,20 @@ def main():
                     elif event.key == pygame.K_RETURN:
                         game_over = False
                         # High scores file
-                        scores = open("high_scores.txt", "a")
-                        scores.write(username + ": " + score + "\n")
-                        scores.close()
+                        if username != '' or username != ' ':
+                            scores = open("high_scores.txt", "a")
+                            scores.write(username + ": " + str(score) + "\n")
+                            scores.close()
                         gameStart()
                     elif pygame.key.name(event.key) in charList:
                         key = pygame.key.name(event.key)
                         username = username + key
 
-                    GAME_DISP.fill(black)
-                    text("Game Over!", 75, white, DISP_W/2, 100)
-                    text("Enter a username:" + username, 30, white, DISP_W/2, DISP_H/2)
-                    pygame.display.update()
+            GAME_DISP.fill(black)
+            text("Game Over", 75, white, DISP_W/2, 100)
+            text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
+            text("Press <ENTER> to continue...", 20, white, DISP_W/2, (DISP_H/2)+50)
+            pygame.display.update()
 
         # ----- Game Events ----- #
         for event in pygame.event.get():
@@ -206,21 +214,49 @@ def main():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     game_pause = True
+ 
+        # Getting time elapsed in the loop
+        for i in range(0, count+1, rate):
+            if count == 60 * i:
+                speed = speed + .2
+                if vel_x > 0:
+                    vel_x = vel_x + change
+                else:
+                    vel_x = vel_x - change
+
+                if vel_y > 0:
+                    vel_y = vel_y + change
+                else:
+                    vel_y = vel_y - change
 
         # Background fill
         GAME_DISP.fill(black)
-        
+
         # timer display
-        text("Seconds: " + score, 35, white, DISP_W/2, 25)
+        text("x" + str(round(speed, 1)) + " Speed", 25, white, (DISP_W/2)-90, 25)
+        text("Score: " + str(score), 25, white, (DISP_W/2)+90, 25)
 
         # Setting positions
         ball.set_pos(ball_x, ball_y)
         paddle1.set_pos(paddle_offset, mY-30)
+        paddle2.set_pos((DISP_W - paddle_offset * 2), ball_y-5)
 
-        ball_x += -velocity
+        # Collision detections
+        if ball_y + 20 >= DISP_H or ball_y <= 0:
+            vel_y = -vel_y
+
+        if ball_x >= DISP_W:
+            vel_x = -vel_x
+
+        # Checks if there is a 
+        if pygame.sprite.groupcollide(ball_group, collision_group, False, False):
+            vel_x = -vel_x
+
+        ball_y += vel_y
+        ball_x += vel_x
 
         # GAME OVER
-        if ball_x <= -25:
+        if ball_x <= -20:
             game_over = True
 
         # Drawing sprites
