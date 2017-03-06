@@ -61,8 +61,8 @@ def button(text, size, color, x, y, w, h, action=None):
                 quit()
             if action == "play":
                 main()
-            if action =="high scores":
-                highScores(text, size, color, x, y)
+            if action == "high scores":
+                highScores()
         color = grey
         
 
@@ -100,12 +100,24 @@ def gameStart():
     quit()
 
 #----- High Scores -----#
-def highScores(color, x, y, w, h):
-    scores = open("high_scores.txt","r")
-    contents = scores.read().split("\n")
-    pygame.draw.rect(GAME_DISP, black , [0, 0, DISP_W, DISP_H])
-    text(str(contents), 20, white, 500, 200)
-    pygame.display.update()
+def highScores():
+
+    game_exit = False
+
+    while not game_exit:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_exit = True
+
+        GAME_DISP.fill(black)
+        text("High Scores", 60, white, DISP_W/2, 125)
+        pygame.display.update()
+        
+    clock.tick(FPS)
+
+    pygame.quit()
+    quit()
 
 # ----- Main Func ----- #
 def main():
@@ -215,7 +227,7 @@ def main():
                     # quit
                     elif event.key == pygame.K_ESCAPE:
                         game_over = False
-                        game_exit = True
+                        gameStart()
                     # continue
                     elif event.key == pygame.K_RETURN:
                         game_over = False
@@ -231,7 +243,7 @@ def main():
             text("Game Over", 75, white, DISP_W/2, 100)
             text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
             button("Press <ENTER> to continue", 20, black, (DISP_W/2)-175, (DISP_H/2)+165, 350, 30)
-            button("Or <ESC> to quit", 20, black, (DISP_W/2)-175, (DISP_H/2)+200, 350, 30)
+            button("Or <ESC> for main menu", 20, black, (DISP_W/2)-175, (DISP_H/2)+200, 350, 30)
             pygame.display.update()
 
         # ----- Game Events ----- #
