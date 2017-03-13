@@ -33,11 +33,15 @@ collision_group.add(user_paddle)
 collision_group.add(AI_paddle)
 
 # ----- Functions ----- #
-def text(text, size, color, x, y):
+def text(text, size, color, x, y, position=None):
     myFont = pygame.font.SysFont("monospace", size)
-    button = myFont.render(text, True, color)
-    text_rect = button.get_rect(center=(x, y))
-    GAME_DISP.blit(button, text_rect)
+    display = myFont.render(text, True, color)
+    text_rect = display.get_rect(center=(x, y))
+    if position == "left":
+        text_rect = display.get_rect()
+        text_rect.x = x
+        text_rect.y = y
+    GAME_DISP.blit(display, text_rect)
 
 def outlinedRect(color, x, y, w, h):
     pygame.draw.rect(GAME_DISP, color, [x, y, w, h])
@@ -63,6 +67,8 @@ def button(text, size, color, x, y, w, h, action=None):
                 main()
             if action == "high scores":
                 highScores()
+            if action == "start":
+                gameStart()
         color = grey
         
 
@@ -87,11 +93,11 @@ def gameStart():
                 
         # Play button
         GAME_DISP.fill(black)
-        text("Pong", 100, white, DISP_W/2, 100)
+        text("Pongs", 100, white, DISP_W/2, 100)
         text("By Lucas and Shawn", 25, white, DISP_W/2, 175)
         button("Play", 40, black, (DISP_W/2)-100, (DISP_H/2)-40, 200, 50, "play")
-        button("Quit", 40, black, (DISP_W/2)-100, (DISP_H/2)+60, 200, 50, "quit")
-        button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+160, 300, 50, "high scores")
+        button("High Scores", 40, black, (DISP_W/2)-150, (DISP_H/2)+60, 300, 50, "high scores")
+        button("Quit", 40, black, (DISP_W/2)-100, (DISP_H/2)+160, 200, 50, "quit")
         pygame.display.update()
 
         clock.tick(FPS)
@@ -104,14 +110,31 @@ def highScores():
 
     game_exit = False
 
+    high_scores = open("high_scores.txt", "r").readlines()
+
     while not game_exit:
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 game_exit = True
 
+        # Drawing high score stuff
         GAME_DISP.fill(black)
-        text("High Scores", 60, white, DISP_W/2, 125)
+        text("High Scores", 60, white, DISP_W/2, 40)
+        button("Back", 40, black, (DISP_W/2)-100, 525, 200, 50, "start")
+        outlinedRect(white, (DISP_W/2)-250, 85, 500, 420)
+        pygame.draw.line(GAME_DISP, white, ((DISP_W/2)-250, 125), ((DISP_W/2)+249, 125))
+        pygame.draw.line(GAME_DISP, white, ((DISP_W/2), 85), ((DISP_W/2), 503))
+        text("User", 30, white, ((DISP_W/2)-200), 105)
+        text("Score", 30, white, ((DISP_W/2)+60), 105)
+
+        count = 0
+        for line in high_scores:
+            line = line.strip("\n")
+            line = line.split()
+            text((line[0] + line[1].ljust(10)), 30, white, (DISP_W/2)-235, 135+count, "left")
+            count = count + 37
+
         pygame.display.update()
         
     clock.tick(FPS)
@@ -130,7 +153,6 @@ def main():
 
     # Initiate the username for the game over loop
     username = ''
-    saved_username = ''
 
     # Setting the loop breakers
     game_exit = False
@@ -140,15 +162,16 @@ def main():
     # ball positon/velocity
     ball_x = DISP_W/2
     ball_y = DISP_H/2
-    vel_x = 4
-    vel_y = 5
+    # Randomize the bounce angle every time the game starts
+    vel_x = random.randint(3, 5)
+    vel_y = random.randint(3, 5)
     speed = 1
 
     # Change speed after how many seconds and by how much
     rate = 5
-    change = 0.5
+    change = 0.2
 
-    # Counter to determine the score inside the while loop
+    # Counter to determine the score inside the game loop
     count = 0
 
     # ----- Game Loop ----- #
@@ -160,6 +183,7 @@ def main():
         # Score is the number of seconds a player lasts
         count = count + 1
 
+        # pretty close to 1 second
         score = int(count/FPS)
         
         # Gets the mouseX and mouseY every frame
@@ -213,37 +237,38 @@ def main():
                     
                 # Basic text input
                 if event.type == pygame.KEYDOWN:
-                    # space
-                    if event.key == pygame.K_SPACE:
-                        key = ' '
-                        username = username + key
                     # backspace
-                    elif event.key == pygame.K_BACKSPACE:
+                    if event.key == pygame.K_BACKSPACE:
                         username = username[0:-1]
-                    # any key in the allowed character list
-                    elif pygame.key.name(event.key) in charList:
-                        key = pygame.key.name(event.key)
-                        username = username + key
-                    # quit
-                    elif event.key == pygame.K_ESCAPE:
-                        game_over = False
-                        gameStart()
-                    # continue
-                    elif event.key == pygame.K_RETURN:
-                        game_over = False
-                        # High scores file
-                        if username != '' or username != ' ':
+                    # space
+                    if len(username) <= 10:
+                        if event.key == pygame.K_SPACE:
+                            key = ' '
+                            username = username + key
+                        # any key in the allowed character list
+                        elif pygame.key.name(event.key) in charList:
+                            key = pygame.key.name(event.key)
+                            username = username + key
+                        # quit
+                        elif event.key == pygame.K_ESCAPE:
+                            game_over = False
+                            gameStart()
+                        # continue
+                        elif event.key == pygame.K_RETURN:
+                            game_over = False
+                            # High scores file
+                            if username == "" or username == " ":
+                                username = "GUEST"
+                            username = username.ljust(10) + str(score)
                             scores = open("high_scores.txt", "a")
-                            scores.write(username + ": " + str(score) + "\n")
+                            scores.write(username + "\n")
                             scores.close()
-                        gameStart()
+                            gameStart()
 
             GAME_DISP.fill(black)
             # Game over text
             text("Game Over", 75, white, DISP_W/2, 100)
             text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
-            button("Press <ENTER> to continue", 20, black, (DISP_W/2)-175, (DISP_H/2)+165, 350, 30)
-            button("Or <ESC> for main menu", 20, black, (DISP_W/2)-175, (DISP_H/2)+200, 350, 30)
             pygame.display.update()
 
         # ----- Game Events ----- #
@@ -282,7 +307,13 @@ def main():
         # Setting positions
         ball.set_pos(ball_x, ball_y)
         user_paddle.set_pos(paddle_offset, mY-30)
-        AI_paddle.set_pos((DISP_W - paddle_offset * 4), ball_y-5)
+        AI_paddle.set_pos((DISP_W - paddle_offset * 4), ball_y-7.5)
+
+        if pygame.sprite.collide_rect(user_paddle, ball):
+            user_paddle.set_pos(paddle_offset + 5, mY-30)
+
+        if pygame.sprite.collide_rect(ball, AI_paddle):
+            AI_paddle.set_pos((DISP_W - paddle_offset * 4) - 5, ball_y-7.5)
 
         # Collision detections
         if ball_y + 20 >= DISP_H or ball_y <= 0:
@@ -316,4 +347,4 @@ def main():
     pygame.quit()
     quit()
 
-gameStart()
+main()
