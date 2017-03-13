@@ -253,7 +253,6 @@ def gameOver(score):
         # Game over text
         text("Game Over", 75, white, DISP_W/2, 100)
         text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
-        text("|", 75, white, DISP_W/2, DISP_H/2+100)
         pygame.display.update()
 
         clock.tick(FPS)
@@ -273,8 +272,8 @@ def main():
     ball_x = DISP_W/2
     ball_y = DISP_H/2
     # Randomize the bounce angle every time the game starts
-    vel_x = 20#random.randint(3, 5)
-    vel_y = 20#random.randint(3, 5)
+    vel_x = random.randint(3, 5)
+    vel_y = random.randint(3, 5)
     speed = 1
 
     # Change speed after how many seconds and by how much
