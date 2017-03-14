@@ -18,10 +18,10 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-class User_paddle(pygame.sprite.Sprite):
-    def __init__(self):
-        super(User_paddle, self).__init__()
-        self.image = pygame.image.load("paddle.png")
+class game_paddle(pygame.sprite.Sprite):
+    def __init__(self, paddle):
+        super(game_paddle, self).__init__()
+        self.image = pygame.image.load(paddle)
         self.rect = self.image.get_rect()
     def set_pos(self, x, y):
         self.rect.x = x
