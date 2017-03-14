@@ -3,6 +3,8 @@ from classes import *
 from colors import *
 
 pygame.init()
+#load music
+pygame.mixer.music.load("rock_and_roll.ogg")
 
 # Settings
 DISP_W = 1000
@@ -72,6 +74,7 @@ def button(text, size, color, x, y, w, h, action=None):
                 pygame.quit()
                 quit()
             if action == "play":
+                pygame.mixer.music.play(1)
                 main()
             if action == "high scores":
                 highScores()
@@ -94,6 +97,7 @@ def gameStart():
     game_exit = False
 
     while not game_exit:
+        pygame.mixer.music.play(1)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
