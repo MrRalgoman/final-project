@@ -11,6 +11,14 @@ FPS = 60
 boundary_thickness = 15
 paddle_offset = 10
 
+# making list of numbers for the blinking cursor on the text input
+
+numbers = []
+
+for i in range(1, 10000, 1):
+    numbers.append(i/2)
+
+
 # Initiate window
 GAME_DISP = pygame.display.set_mode((DISP_W, DISP_H))
 pygame.display.set_caption("Pong")
@@ -105,6 +113,79 @@ def gameStart():
     pygame.quit()
     quit()
 
+# ----- Game Over ----- #
+def gameOver(score):
+    
+    # Accepted username keys
+    chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+    charList = []
+    for char in chars:
+        charList.append(char)
+
+    # Initiate the username for the game over loop
+    username = ''
+
+    game_over = True
+
+    count = 0
+    
+    while game_over:
+
+        count = count + 1
+
+        # Calculate timer
+        time = round((count/FPS), 1)
+
+        pygame.mouse.set_visible(True)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = False
+                    
+            # Basic text input
+            if event.type == pygame.KEYDOWN:
+                # backspace
+                if event.key == pygame.K_BACKSPACE:
+                    username = username[0:-1]
+                # space
+                if len(username) <= 10:
+                    if event.key == pygame.K_SPACE:
+                        key = ' '
+                        username = username + key
+                    # any key in the allowed character list
+                    elif pygame.key.name(event.key) in charList:
+                        key = pygame.key.name(event.key)
+                        username = username + key
+                    # quit
+                    elif event.key == pygame.K_ESCAPE:
+                        game_over = False
+                        gameStart()
+                    # continue
+                    elif event.key == pygame.K_RETURN:
+                        game_over = False
+                        # High scores file
+                        if username == "" or username == " ":
+                            username = "GUEST"
+                        scores = open("high_scores.txt", "a")
+                        scores.write(username + "\n")
+                        scores.write(str(score) + "\n")
+                        scores.close()
+                        gameStart()
+
+        GAME_DISP.fill(black)
+        # Game over text
+        text("Game Over", 75, white, DISP_W/2, 100)
+        text("You scored " + str(score) + " points!", 30, white, DISP_W/2, 175)
+        text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
+        if time in numbers:
+            text("|", 30, white, DISP_W/2, DISP_H/2-100)
+        pygame.display.update()
+
+        clock.tick(FPS)
+
+    pygame.quit()
+    quit()
+
 #----- High Scores -----#
 def highScores():
 
@@ -126,7 +207,6 @@ def highScores():
 
     # Creating sorted list
     for i in range(0, len(high_scores), 2):
-        #print(i)
         scoreList.append(high_scores[i:i+2])
 
     # Actual sort, have to reverse so high to low
@@ -195,70 +275,6 @@ def highScores():
 
         pygame.quit()
         quit()
-
-# ----- Game Over ----- #
-def gameOver(score):
-
-    # Accepted username keys
-    chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-    charList = []
-    for char in chars:
-        charList.append(char)
-
-    # Initiate the username for the game over loop
-    username = ''
-
-    game_over = True
-    
-    while game_over:
-
-        pygame.mouse.set_visible(True)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                game_over = False
-                game_exit = True
-                    
-            # Basic text input
-            if event.type == pygame.KEYDOWN:
-                # backspace
-                if event.key == pygame.K_BACKSPACE:
-                    username = username[0:-1]
-                # space
-                if len(username) <= 10:
-                    if event.key == pygame.K_SPACE:
-                        key = ' '
-                        username = username + key
-                    # any key in the allowed character list
-                    elif pygame.key.name(event.key) in charList:
-                        key = pygame.key.name(event.key)
-                        username = username + key
-                    # quit
-                    elif event.key == pygame.K_ESCAPE:
-                        game_over = False
-                        gameStart()
-                    # continue
-                    elif event.key == pygame.K_RETURN:
-                        game_over = False
-                        # High scores file
-                        if username == "" or username == " ":
-                            username = "GUEST"
-                        scores = open("high_scores.txt", "a")
-                        scores.write(username + "\n")
-                        scores.write(str(score) + "\n")
-                        scores.close()
-                        gameStart()
-
-        GAME_DISP.fill(black)
-        # Game over text
-        text("Game Over", 75, white, DISP_W/2, 100)
-        text("Enter a username: " + username, 30, white, DISP_W/2, DISP_H/2)
-        pygame.display.update()
-
-        clock.tick(FPS)
-
-    pygame.quit()
-    quit()
 
 # ----- Main Func ----- #
 def main():
