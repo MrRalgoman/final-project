@@ -354,10 +354,10 @@ def main():
     rate = 5
 
     # Change the actual game ball speed increase interval here
-    change = 0.75
+    speed = 1.5
 
     # Only the initial speed number that displays on screen
-    speed = 1
+    displaySpeed = 1
 
     # Counter to determine the score inside the game loop
     count = 0
@@ -379,6 +379,12 @@ def main():
         
         # Gets the mouseX and mouseY every frame
         mX, mY = pygame.mouse.get_pos()
+
+        # Checks if mouse pos is close to off of screen
+        # If it is it sets the mouse pos to the center
+        # Mostly for convience...
+        if mX <= 10 or mX >= DISP_W-10:
+            pygame.mouse.set_pos([DISP_W/2, mY])
 
         # ----- Game Pause ----- #
         while game_pause:
@@ -449,23 +455,23 @@ def main():
             # Fires 1 frame based on what the rate is set to
             if count == 60 * i:
                 # Changes the speed display on the game screen
-                speed = speed + .2
+                displaySpeed = displaySpeed + .2
                 # Have to make sure that the speed changes in the correct direction
                 if vel_x > 0:
-                    vel_x = vel_x + change
+                    vel_x = vel_x + speed
                 else:
-                    vel_x = vel_x - change
+                    vel_x = vel_x - speed
 
                 if vel_y > 0:
-                    vel_y = vel_y + change
+                    vel_y = vel_y + speed
                 else:
-                    vel_y = vel_y - change
+                    vel_y = vel_y - speed
 
         # Background fill
         GAME_DISP.fill(black)
 
         # Timer display
-        text("x" + str(round(speed, 1)) + " Speed", 25, white, (DISP_W/2)-90, 25)
+        text("x" + str(round(displaySpeed, 1)) + " Speed", 25, white, (DISP_W/2)-90, 25)
         text("Score: " + str(score), 25, white, (DISP_W/2)+90, 25)
 
         # Setting positions
