@@ -7,7 +7,6 @@ pygame.init()
 #load music
 pygame.mixer.music.load("rock_and_roll.ogg")
 slap = pygame.mixer.Sound("slap.wav")
-click = pygame.mixer.Sound("click.wav")
 
 # Settings
 DISP_W = 1000
@@ -237,10 +236,10 @@ def gameOver(score):
 
 def highScores():
 
+    game_exit = False
+
     # runs if high_scores.txt exists
     try:
-
-        game_exit = False
 
         high_scores = open("high_scores.txt", "r").readlines()
 
@@ -312,6 +311,8 @@ def highScores():
     except FileNotFoundError:
 
         while not game_exit:
+
+            pygame.mixer.music.stop()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
