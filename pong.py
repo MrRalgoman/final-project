@@ -1,6 +1,7 @@
-import pygame, sys, time, random
+import pygame, sys, time
 from classes import *
 from colors import *
+import secrets
 
 pygame.init()
 
@@ -347,8 +348,8 @@ def main():
     ball_y = DISP_H/2
 
     # Randomize the bounce angle every time the game starts
-    vel_x = random.randint(3, 5)
-    vel_y = random.randint(3, 5)
+    vel_x = secrets.SystemRandom().randint(3, 5)
+    vel_y = secrets.SystemRandom().randint(3, 5)
 
     # Change the speed after how many seconds
     rate = 5
